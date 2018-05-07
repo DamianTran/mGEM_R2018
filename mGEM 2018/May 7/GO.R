@@ -55,7 +55,7 @@ GOdb = as.data.frame(GOTERM) # List of all GO terms and definitions
 
 # Now, let's get the indices that contain words of interest
 
-subsetGOSearch = function(terms, category = "Term", collapse = FALSE){ 
+subsetGOSearch = function(terms, category = "Definition", collapse = FALSE){ 
   
   # We'll use a function to find indices associated with a variety of terms and collapse them
   
@@ -98,13 +98,12 @@ getGOGenes = function(GOset){ # Pass the entire go set
   # Function requires probe2GO and probe2Symbol
   # GOset: the set containing a "go_id" field
   
-  matchIdx = match(probe2GO$go_id, GOset$go_id);
-  
-  matchIdx = matchIdx[!is.na(matchIdx)]
+  matchIdx = match(GOset$go_id, probe2GO$go_id);
+  matchIdx = unique(matchIdx[!is.na(matchIdx)])
   
   probeSubset = probe2GO[matchIdx,]
   
-  matchIdx = match(probe2Symbol$probe_id, probeSubset$probe_id)
+  matchIdx = match(probeSubset$probe_id, probe2Symbol$probe_id)
   matchIdx = matchIdx[!is.na(matchIdx)]
   
   output = probe2Symbol[matchIdx,]
@@ -119,5 +118,14 @@ specificGenes = getGOGenes(GOSpecificSubset)
 # ta-da!  Future implementations should include a condensed table with the gene names side-by-side to the GO annotations
 # for a more complete reference that can be analyzed and checked for validity
 
+# Here, we chain the calls together, getting the genes from the result of the GO subset search
+interestGenes = getGOGenes(subsetGOSearch(c("protein", "aggregat"), "Definition", TRUE))
+
+#Analog
+
+# For simplicity, the chained call is re-written as a complete function
+geneGOSearch = function(genes, ...){ # The ellipses carry over parameters to contained functions
+  return(getGOGenes(subsetGOSearch(genes, ...))) # The ellipsese here will pass the default parameters if none are provided
+}
 
 
