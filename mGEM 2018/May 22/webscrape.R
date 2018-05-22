@@ -14,7 +14,7 @@ library(RCurl)
 
 findSynonyms = function(query){
   
-  synonyms = readHTMLList(getURL(paste("http://www.thesaurus.com/browse/", query, "?s=t", sep = "")))
+  synonyms = readHTMLList(getURL(paste("http://www.thesaurus.com/browse/", query, sep = "")))
   # We paste our query into the variable field of the url
   # The URL, if protection is HTTP, can be pasted directly into readHTMLList()
   # However for flexibility, we wrap using getURL to ensure information can be extracted even from HTTPS domains
