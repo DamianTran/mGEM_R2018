@@ -1,5 +1,5 @@
 # Sets the working directory - change this to your desired project directory
-setwd("C:/Users/Damian/Documents/Tutorials/R/mGEM 2018/")
+setwd("C:/Users/Umaseh/Documents/GitHub/mGEM_R2018/mGEM 2018/")
 
 NGSgen = function(ncol, nrow, seqLength = NA, seq = NA){
   if(is.na(seq) & !is.na(seqLength)){
