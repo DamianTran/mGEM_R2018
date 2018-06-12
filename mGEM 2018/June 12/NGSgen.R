@@ -12,13 +12,6 @@
 #   The background noise
 #   Contamination and foreign sequences
 
-if(!require("rstudioapi")){ # Load the R studio API and get the document context to set the working directory
-  install.packages("rstudioapi")
-}
-library(rstudioapi)
-
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) 
-
 # Generate a noise matrix
 randSeqMatrix = function(ncol, nrow, seqLength){
     randomMatrix = matrix(nrow = nrow, ncol = ncol)
@@ -142,6 +135,7 @@ setClass("simNGSmatrix",
          prototype = list(wild_type = character(),
                           matrix = matrix(0,0,0)))
 # As it is, the "wild_type" and "matrix" elements must be accessed with the "@" operator
+
 # Where sim_matrix is a simNGSmatrix class instance and sim_matrix@matrix would return the matrix it contains
 # To make this class more portable, we define a method for the S4 class subsetting operator x$name
 setMethod("$", "simNGSmatrix",
@@ -150,7 +144,9 @@ setMethod("$", "simNGSmatrix",
 })
 setMethod("[", "simNGSmatrix", # We can also overload the indexing operator to access the matrix more easily
           function(x,i,j,...,drop = TRUE){ # Drop = TRUE allows us to use empty indexing such as x[1,]
-  return(x@matrix[i,j]) 
+            
+  return(x@matrix[i,j]) # Use the base @ operator to access the "matrix" slot of x
+            
   # Returing the value this way ensures our indexing is READ-ONLY so that data can never be modified by accident
   # by the user (ie. x[1,1] = "ATCG" is not possible, but we can read as in a = x[1,1])
 })
@@ -211,3 +207,12 @@ plotFreq = function(simNGS, numSeq = 100, skipWT = TRUE,
           space = 0,
           main = main, ylab = ylab) # Make the plot
 }
+
+# Try this:
+#   plotFreq(simNGSmatrix(100,100,randSeq(20),0.1,0.9))
+
+# Some statistics:
+# Now being able to aggregate the mutants, we need to be able to determine if a certain mutation is occurring beyond chance
+
+# source("stats.R")
+
