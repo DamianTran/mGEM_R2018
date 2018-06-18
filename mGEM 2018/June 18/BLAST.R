@@ -29,12 +29,13 @@ library(RFLPtools)
 # Example
 # seq = *nucleotide sequence*
 # write.fasta(seq, "Test Sequence", "test.fa")
+
 # system("blastn -db nr -query test.fa -remote -outfmt 6 -out test.txt")
 
 # Function to send aggregated count sequences for mapping to nucleotide BLAST
 # Warning: takes a long time
 
-BLAST_counts = function(counts, filebase, taxonID = 9606){
+BLAST_counts = function(counts, filebase){
   
   # Counts: aggregated counts produced by the aggregate() function
   # filebase: the base of the filename, which will have .fa and .txt extensions appended to it by this function
@@ -43,7 +44,8 @@ BLAST_counts = function(counts, filebase, taxonID = 9606){
   inFILE = paste(filebase, ".fa", sep = "")
   outFILE = paste(filebase, ".txt", sep = "")
   
-  write.fasta(counts[1][1], "SEQUENCE_1", file.out = inFILE)
+  write.fasta(counts$uniqueSeq[1], "SEQUENCE_1", open = "w", file.out = inFILE)
+
   for(i in 2:length(counts$uniqueSeq)){
     write.fasta(counts$uniqueSeq[i], paste("SEQUENCE_", i, sep = ""), file.out = inFILE, open = "a") # Append extra sequences to the same file
   }
@@ -62,23 +64,15 @@ BLAST_counts = function(counts, filebase, taxonID = 9606){
   
   tryCatch({
     output = read.blast(outFILE)
-    
     # Since mappings are returned in accession IDs of various nature, we use the MyGene servers
     # (From Umaseh's suggestion in MyGene.R) to discover the gene names
     # We will use the query function to determine which sequences map, and remove the ones that don't
     cat("Converting accession IDs\n")
-    keep_index = numeric(0)
-    for(i in 1:nrow(output)){
-      tryCatch({
-        check = query(output$subject.id[i])
-        check$hits = check$hits[check$hits$taxid == taxonID,]
-        if(nrow(check$hits) > 0){
-          keep_index = c(keep_index, i)
-          output$subject.id[i] = check$hits[1,]$name
-        }
-      },error = function(cond){ })
-    }
-    output = output[keep_index,] 
+    tryCatch({
+      check = queryMany(output$subject.id, scopes = "all", species = "human", fields = "name")
+      output$subject.id = check$name
+      output = output[!is.na(output$subject.id),]
+    },error = function(cond){ })
     write.table(output, sep = '\t', file = outFILE, col.names = FALSE, row.names = FALSE,
                 quote = FALSE) # Replace the original with mapped conversions
     cat("SUCCESS - table saved to ", outFILE, '\n')
@@ -99,7 +93,7 @@ BLAST_filter_counts = function(counts, name, BLASToutput, identityThreshold = 70
   # BLASToutput: an output produced by BLAST_counts on the input counts object
   # identityThreshold: how much must the query match the target gene (in %)
   
-  BLASToutput = BLASToutput[grep(name, subject.id, ignore.case = TRUE),]
+  BLASToutput = BLASToutput[grep(name, BLASToutput$subject.id, ignore.case = TRUE),]
   mapNames = BLASToutput$query.id
   mapIdx = numeric(0)
   for(name in mapNames){

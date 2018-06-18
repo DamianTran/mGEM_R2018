@@ -16,7 +16,7 @@ NGSdemo = function(){
           "ACCATCACCACTAA", sep = "")
   
   cat("Generating simulated NGS dataset")
-  assign("NGSdemoset", simNGSmatrix(1000,1000, ABseq, 0.1, 0.9), envir = globalenv()) # Assign to global env
+  assign("NGSdemoset", simNGSmatrix(10,10, ABseq, 0.1, 0.9), envir = globalenv()) # Assign to global env
   # If you have time, crank the number of reads up higher - right now we are at 1m reads
   cat("\nAggregating counts\n")
   frequencies = aggregate(NGSdemoset, 0.7, 1.3) # Aggregate and size-select
@@ -26,7 +26,7 @@ NGSdemo = function(){
   frequencies = BLAST_filter_counts(frequencies, "Amyloid", 0.7) # BLAST to determine if sequences match the query
   
   # Normalize counts to log2
-  counts$counts = log2(frequencies$counts)
+  frequncies$counts = log2(frequencies$counts)
   
   barplot(frequencies$counts, names.arg = frequencies$uniqueSeq, cex.names = 0.5, las = 2,
           space = 0,
