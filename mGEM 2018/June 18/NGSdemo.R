@@ -26,7 +26,7 @@ NGSdemo = function(){
   frequencies = BLAST_filter_counts(frequencies, "Amyloid", 0.7) # BLAST to determine if sequences match the query
   
   # Normalize counts to log2
-  frequncies$counts = log2(frequencies$counts)
+  frequencies$counts = log2(frequencies$counts)
   
   barplot(frequencies$counts, names.arg = frequencies$uniqueSeq, cex.names = 0.5, las = 2,
           space = 0,
